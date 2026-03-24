@@ -13,11 +13,12 @@ import {
 	Database,
 	Flame,
 	Globe,
+	RefreshCw,
 	TrendingUp,
 	Users,
 	Zap,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type Tab = "overview" | "tokenomics" | "architecture" | "rewards" | "grants";
 
@@ -40,6 +41,8 @@ const TABS: { id: Tab; label: string }[] = [
 	{ id: "grants", label: "Grants" },
 ];
 
+const POLL_INTERVAL_MS = 30_000;
+
 function formatLargeNumber(n: number): string {
 	if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
 	if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -47,26 +50,51 @@ function formatLargeNumber(n: number): string {
 	return n.toString();
 }
 
+function formatTimestamp(date: Date): string {
+	return date.toLocaleTimeString([], {
+		hour: "2-digit",
+		minute: "2-digit",
+		second: "2-digit",
+	});
+}
+
 export default function Dashboard() {
 	const [activeTab, setActiveTab] = useState<Tab>("overview");
 	const [stats, setStats] = useState<NetworkStats>(DEFAULT_STATS);
+	const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+	const fetchStats = useCallback(async () => {
+		setLoading(true);
+		setError(null);
+		try {
+			const res = await fetch("/api/stats");
+			if (!res.ok) throw new Error(`API returned ${res.status}`);
+			const data = await res.json();
+			if (!data.error) {
+				setStats((prev) => ({ ...prev, ...data }));
+			}
+			setLastUpdated(new Date());
+		} catch (err) {
+			setError(err instanceof Error ? err.message : "Failed to fetch stats");
+		} finally {
+			setLoading(false);
+		}
+	}, []);
 
 	useEffect(() => {
-		async function loadStats() {
-			try {
-				const res = await fetch("/api/stats");
-				if (res.ok) {
-					const data = await res.json();
-					if (!data.error) {
-						setStats((prev) => ({ ...prev, ...data }));
-					}
-				}
-			} catch {
-				// Use defaults
+		fetchStats();
+
+		intervalRef.current = setInterval(fetchStats, POLL_INTERVAL_MS);
+
+		return () => {
+			if (intervalRef.current) {
+				clearInterval(intervalRef.current);
 			}
-		}
-		loadStats();
-	}, []);
+		};
+	}, [fetchStats]);
 
 	return (
 		<div className="min-h-screen">
@@ -83,6 +111,20 @@ export default function Dashboard() {
 							</p>
 						</div>
 						<div className="flex items-center gap-3">
+							{lastUpdated && (
+								<span className="text-xs text-[var(--canton-muted)]">
+									Last updated: {formatTimestamp(lastUpdated)}
+								</span>
+							)}
+							<button
+								type="button"
+								onClick={fetchStats}
+								disabled={loading}
+								className="text-[var(--canton-muted)] hover:text-white transition-colors disabled:opacity-50"
+								title="Refresh stats"
+							>
+								<RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+							</button>
 							<span className="badge badge-green">
 								<span className="w-2 h-2 bg-[var(--canton-green)] rounded-full" />
 								Mainnet
@@ -117,6 +159,24 @@ export default function Dashboard() {
 					</nav>
 				</div>
 			</header>
+
+			{/* Error banner */}
+			{error && (
+				<div className="max-w-7xl mx-auto px-4 mt-4">
+					<div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 flex items-center justify-between">
+						<span className="text-sm text-red-400">
+							Failed to load stats: {error}
+						</span>
+						<button
+							type="button"
+							onClick={fetchStats}
+							className="text-sm text-red-400 hover:text-red-300 underline"
+						>
+							Retry
+						</button>
+					</div>
+				</div>
+			)}
 
 			{/* Content */}
 			<main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
