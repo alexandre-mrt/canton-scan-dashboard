@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+:root {
+	--canton-blue: #0052ff;
+	--canton-dark: #0a0e1a;
+	--canton-card: #111827;
+	--canton-border: #1f2937;
+	--canton-text: #e5e7eb;
+	--canton-muted: #9ca3af;
+	--canton-green: #10b981;
+	--canton-red: #ef4444;
+	--canton-yellow: #f59e0b;
+}
+
+body {
+	background: var(--canton-dark);
+	color: var(--canton-text);
+	font-family: system-ui, -apple-system, sans-serif;
+}
+
+.card {
+	background: var(--canton-card);
+	border: 1px solid var(--canton-border);
+	border-radius: 12px;
+	padding: 1.5rem;
+}
+
+.stat-value {
+	font-size: 2rem;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.stat-label {
+	font-size: 0.875rem;
+	color: var(--canton-muted);
+	margin-top: 0.25rem;
+}
+
+.badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.25rem 0.75rem;
+	border-radius: 9999px;
+	font-size: 0.75rem;
+	font-weight: 600;
+}
+
+.badge-green {
+	background: rgba(16, 185, 129, 0.15);
+	color: var(--canton-green);
+}
+
+.badge-red {
+	background: rgba(239, 68, 68, 0.15);
+	color: var(--canton-red);
+}
+
+.badge-blue {
+	background: rgba(0, 82, 255, 0.15);
+	color: var(--canton-blue);
+}
+
+.glow {
+	box-shadow: 0 0 20px rgba(0, 82, 255, 0.1);
+}
+
+.gradient-text {
+	background: linear-gradient(135deg, #0052ff, #10b981);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
