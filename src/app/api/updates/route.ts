@@ -11,7 +11,7 @@ export async function GET() {
 				transactions: [],
 				error: error instanceof Error ? error.message : "Failed to fetch updates",
 			},
-			{ status: 200 },
+			{ status: 502 },
 		);
 	}
 }

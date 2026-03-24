@@ -6,6 +6,7 @@ import { RecentUpdates } from "@/components/recent-updates";
 import { RewardCalculator } from "@/components/reward-calculator";
 import { StatCard } from "@/components/stat-card";
 import { TokenomicsChart } from "@/components/tokenomics-chart";
+import type { NetworkStats } from "@/types/canton";
 import {
 	Activity,
 	Coins,
@@ -20,19 +21,10 @@ import { useEffect, useState } from "react";
 
 type Tab = "overview" | "tokenomics" | "architecture" | "rewards" | "grants";
 
-interface NetworkStats {
-	totalTransactions: number;
-	activeValidators: number;
-	currentRound: number;
-	cantonCoinPrice: number;
-	totalMinted: number;
-	totalBurned: number;
-	netSupplyChange: number;
-}
-
 const DEFAULT_STATS: NetworkStats = {
 	totalTransactions: 15_000_000,
 	activeValidators: 100,
+	totalPartiesHosted: 0,
 	currentRound: 0,
 	cantonCoinPrice: 0.15,
 	totalMinted: 22_000_000_000,

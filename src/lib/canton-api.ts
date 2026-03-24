@@ -84,6 +84,17 @@ export function calculateAppRewards(
 	monthlyRewardPoolCC = 516_000_000,
 	ccPrice = 0.15,
 ) {
+	if (networkTotalTransactions === 0) {
+		return {
+			monthlyTransactions,
+			networkTotalTransactions,
+			monthlyRewardPoolCC,
+			ccPrice,
+			estimatedMonthlyCC: 0,
+			estimatedMonthlyUSD: 0,
+		};
+	}
+
 	const share = monthlyTransactions / networkTotalTransactions;
 	const estimatedMonthlyCC = share * monthlyRewardPoolCC;
 	const estimatedMonthlyUSD = estimatedMonthlyCC * ccPrice;
